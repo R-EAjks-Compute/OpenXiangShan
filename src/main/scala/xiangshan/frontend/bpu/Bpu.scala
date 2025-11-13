@@ -38,6 +38,7 @@ import xiangshan.frontend.bpu.sc.Sc
 import xiangshan.frontend.bpu.tage.Tage
 import xiangshan.frontend.bpu.ubtb.MicroBtb
 import xiangshan.frontend.bpu.utage.MicroTage
+import xiangshan.frontend.bpu.utage1.MicroTage1
 
 class Bpu(implicit p: Parameters) extends BpuModule with HalfAlignHelper {
   class DummyBpuIO extends Bundle {
@@ -55,7 +56,8 @@ class Bpu(implicit p: Parameters) extends BpuModule with HalfAlignHelper {
   private val abtb        = Module(new AheadBtb)
   private val utage       = Module(new MicroTage)
   private val mbtb        = Module(new MainBtb)
-  private val tage        = Module(new Tage)
+  private val tempTage    = Module(new MicroTage1)
+  // private val tage        = Module(new Tage)
   private val ittage      = Module(new Ittage)
   private val sc          = Module(new Sc)
   private val ras         = Module(new Ras)
@@ -68,7 +70,7 @@ class Bpu(implicit p: Parameters) extends BpuModule with HalfAlignHelper {
     abtb,
     utage,
     mbtb,
-    tage,
+    tempTage,
     sc,
     ittage,
     ras
@@ -85,7 +87,8 @@ class Bpu(implicit p: Parameters) extends BpuModule with HalfAlignHelper {
   abtb.io.enable        := ctrl.abtbEnable
   utage.io.enable       := true.B
   mbtb.io.enable        := ctrl.mbtbEnable
-  tage.io.enable        := ctrl.tageEnable
+  // tage.io.enable        := ctrl.tageEnable
+  tempTage.io.enable    := true.B
   sc.io.enable          := ctrl.scEnable
   ittage.io.enable      := ctrl.ittageEnable
   ras.io.enable         := false.B
@@ -216,9 +219,11 @@ class Bpu(implicit p: Parameters) extends BpuModule with HalfAlignHelper {
   ras.io.specIn.bits.cfiPosition := s3_prediction.cfiPosition
 
   // tage
-  tage.io.mbtbResult             := mbtb.io.result
-  tage.io.foldedPathHist         := phr.io.s0_foldedPhr
-  tage.io.foldedPathHistForTrain := phr.io.trainFoldedPhr
+  // tage.io.mbtbResult             := mbtb.io.result
+  // tage.io.foldedPathHist         := phr.io.s0_foldedPhr
+  // tage.io.foldedPathHistForTrain := phr.io.trainFoldedPhr
+  tempTage.io.foldedPathHist         := phr.io.s0_foldedPhr
+  tempTage.io.foldedPathHistForTrain := phr.io.trainFoldedPhr
 
   // ittage
   ittage.io.s1_foldedPhr   := phr.io.s1_foldedPhr
@@ -309,7 +314,10 @@ class Bpu(implicit p: Parameters) extends BpuModule with HalfAlignHelper {
     )
 
   private val s2_mbtbResult    = mbtb.io.result
-  private val s2_condTakenMask = tage.io.condTakenMask
+  // private val s2_condTakenMask = tage.io.condTakenMask
+  private val s2_tempTageTaken    = RegEnable(tempTage.io.prediction.taken, s1_fire)
+  private val s2_tempTagePosition = RegEnable(tempTage.io.prediction.cfiPosition, s1_fire)
+  private val s2_condTakenMask = s2_mbtbResult.map{e => (e.bits.cfiPosition === s2_tempTagePosition) && e.bits.attribute.isConditional && s2_tempTageTaken}
   private val s2_jumpMask = VecInit(s2_mbtbResult.map { e =>
     e.valid && (e.bits.attribute.isDirect || e.bits.attribute.isIndirect)
   })
@@ -363,7 +371,10 @@ class Bpu(implicit p: Parameters) extends BpuModule with HalfAlignHelper {
   private val s3_mbtbMeta = RegEnable(mbtb.io.meta, s2_fire)
 
   // tage meta
-  private val s3_tageMeta = RegEnable(tage.io.meta, s2_fire)
+  // private val s3_tageMeta = RegEnable(tage.io.meta, s2_fire)
+  private val s1_tempTageMeta = tempTage.io.prediction.meta.bits
+  private val s2_tempTageMeta = RegEnable(s1_tempTageMeta, s1_fire)
+  private val s3_tempTageMeta = RegEnable(s2_tempTageMeta, s2_fire)
 
   // ittage meta
   private val s3_ittageMeta = ittage.io.meta
@@ -392,7 +403,8 @@ class Bpu(implicit p: Parameters) extends BpuModule with HalfAlignHelper {
 
   s3_meta.utage  := s3_utageMeta
   s3_meta.mbtb   := s3_mbtbMeta
-  s3_meta.tage   := s3_tageMeta
+  s3_meta.tempTage   := s3_tempTageMeta
+  s3_meta.tage       := DontCare
   s3_meta.ras    := s3_rasMeta
   s3_meta.phr    := s3_phrMeta
   s3_meta.ittage := s3_ittageMeta

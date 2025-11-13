@@ -26,6 +26,7 @@ import xiangshan.frontend.bpu.sc.ScParameters
 import xiangshan.frontend.bpu.tage.TageParameters
 import xiangshan.frontend.bpu.ubtb.MicroBtbParameters
 import xiangshan.frontend.bpu.utage.MicroTageParameters
+import xiangshan.frontend.bpu.utage1.MicroTage1Parameters
 
 // For users: these are default Bpu parameters set by dev, do not change them here,
 // use top-level Parameters.scala instead.
@@ -40,6 +41,7 @@ case class BpuParameters(
     ubtbParameters:   MicroBtbParameters = MicroBtbParameters(),
     abtbParameters:   AheadBtbParameters = AheadBtbParameters(),
     utageParameters:  MicroTageParameters = MicroTageParameters(),
+    utage1Parameters: MicroTage1Parameters = MicroTage1Parameters(),
     mbtbParameters:   MainBtbParameters = MainBtbParameters(),
     tageParameters:   TageParameters = TageParameters(),
     scParameters:     ScParameters = ScParameters(),
@@ -77,6 +79,9 @@ trait HasBpuParameters extends HasFrontendParameters {
         _.getFoldedHistoryInfoSet(NumBtbResultEntries, bpuParameters.scParameters.TagWidth)
       }.reduce(_ ++ _) ++
       bpuParameters.utageParameters.TableInfos.map {
+        _.getFoldedHistoryInfoSet()
+      }.reduce(_ ++ _) ++
+      bpuParameters.utage1Parameters.TableInfos.map {
         _.getFoldedHistoryInfoSet()
       }.reduce(_ ++ _)
 

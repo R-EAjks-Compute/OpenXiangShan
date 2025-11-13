@@ -114,7 +114,7 @@ class MicroTage(implicit p: Parameters) extends BasePredictor with HasMicroTageP
   private val t0_histTableNeedUpdate = t0_predHit && t0_trainValid
   private val t0_updateTaken = t0_predTaken ^ t0_histHitMisPred // TODO: Perhaps more fine-grained operations are needed
   private val t0_updateCfiposition = t0_predCfiPosition
-  private val t0_allocTaken        = t0_trainData.attribute.isConditional && t0_trainData.taken
+  private val t0_allocTaken       = t0_trainData.attribute.isConditional && t0_trainData.taken
   private val t0_allocCfiPosition =
     Mux(t0_trainData.attribute.isConditional, t0_trainData.cfiPosition, t0_predCfiPosition)
 
