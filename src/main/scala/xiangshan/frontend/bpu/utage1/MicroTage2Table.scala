@@ -26,7 +26,7 @@ import xiangshan.frontend.bpu.FoldedHistoryInfo
 import xiangshan.frontend.bpu.SaturateCounter
 import xiangshan.frontend.bpu.history.phr.PhrAllFoldedHistories
 
-class MicroTage1Table(
+class MicroTage2Table(
     val numSets:       Int,
     val histLen:       Int,
     val tagLen:        Int,
@@ -46,13 +46,25 @@ class MicroTage1Table(
       val hitUseful:   SaturateCounter = new SaturateCounter(UsefulWidth)
     }
     class MicroTageUpdate extends Bundle {
-      val startPc:                PrunedAddr            = new PrunedAddr(VAddrBits)
-      val cfiPosition:            UInt                  = UInt(CfiPositionWidth.W)
-      val alloc:                  Bool                  = Bool()
-      val allocTaken:             Bool                  = Bool()
-      val correct:                Bool                  = Bool()
-      val taken:                  Bool                  = Bool()
-      val canUsefulUpdate:        Bool                  = Bool()
+      // val startPc:                PrunedAddr            = new PrunedAddr(VAddrBits)
+      // val cfiPosition:            UInt                  = UInt(CfiPositionWidth.W)
+      // val alloc:                  Bool                  = Bool()
+      // val allocTaken:             Bool                  = Bool()
+      // val correct:                Bool                  = Bool()
+      // val taken:                  Bool                  = Bool()
+      // val canUsefulUpdate:        Bool                  = Bool()
+      // val foldedPathHistForTrain: PhrAllFoldedHistories = new PhrAllFoldedHistories(AllFoldedHistoryInfo)
+      // val oldTakenCtr:            SaturateCounter       = new SaturateCounter(TakenCtrWidth)
+      // val oldUseful:              SaturateCounter       = new SaturateCounter(UsefulWidth)
+      val startPc:  PrunedAddr  = new PrunedAddr(VAddrBits)
+      val allocValid:   Bool    = Bool()
+      val updateValid:  Bool    = Bool()
+      val usefulValid:  Bool    = Bool()
+      val allocTaken:   Bool    = Bool()
+      val allocCfiPosition:     UInt = UInt(CfiPositionWidth.W)
+      val updateTaken:          Bool = Bool()
+      val updateCfiPosition:    UInt = UInt(CfiPositionWidth.W)
+      val usefulCorrect:        Bool = Bool()
       val foldedPathHistForTrain: PhrAllFoldedHistories = new PhrAllFoldedHistories(AllFoldedHistoryInfo)
       val oldTakenCtr:            SaturateCounter       = new SaturateCounter(TakenCtrWidth)
       val oldUseful:              SaturateCounter       = new SaturateCounter(UsefulWidth)
@@ -118,24 +130,29 @@ class MicroTage1Table(
   updateEntry.valid := true.B
   updateEntry.tag   := trainTag
   updateEntry.takenCtr.value := Mux(
-    io.update.bits.alloc,
+    io.update.bits.allocValid,
     oldTakenCtr.getNeutral,
-    oldTakenCtr.getUpdate(io.update.bits.taken)
+    oldTakenCtr.getUpdate(io.update.bits.updateTaken)
   )
 
-  updateEntry.cfiPosition := io.update.bits.cfiPosition
+  updateEntry.cfiPosition := Mux(
+    io.update.bits.allocValid,
+    io.update.bits.allocCfiPosition,
+    io.update.bits.updateCfiPosition
+  )
+
   updateEntry.useful.value := Mux(
-    io.update.bits.alloc,
+    io.update.bits.allocValid,
     oldUseful.getNeutral,
-    oldUseful.getUpdate(io.update.bits.correct)
+    oldUseful.getUpdate(io.update.bits.usefulCorrect)
   )
 
   // Write back updated entry on valid update
-  when(io.update.valid) {
+  when(io.update.valid && (io.update.bits.allocValid || io.update.bits.updateValid)) {
     entries(trainIdx)       := updateEntry
   }
 
-  when(io.update.valid && (io.update.bits.canUsefulUpdate || io.update.bits.alloc)) {
+  when(io.update.valid && (io.update.bits.usefulValid || io.update.bits.allocValid)) {
     usefulEntries(trainIdx) := updateEntry.useful
   }
 
@@ -168,6 +185,6 @@ class MicroTage1Table(
   // Per-index access distribution
   for (i <- 0 until numSets) {
     XSPerfAccumulate(f"update_idx_access_$i", (trainIdx === i.U) && io.update.valid)
-    XSPerfAccumulate(f"alloc_idx_access_$i", (trainIdx === i.U) && io.update.valid && io.update.bits.alloc)
+    XSPerfAccumulate(f"alloc_idx_access_$i", (trainIdx === i.U) && io.update.valid && io.update.bits.allocValid)
   }
 }

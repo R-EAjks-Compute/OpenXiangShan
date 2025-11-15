@@ -38,7 +38,7 @@ import xiangshan.frontend.bpu.sc.Sc
 import xiangshan.frontend.bpu.tage.Tage
 import xiangshan.frontend.bpu.ubtb.MicroBtb
 import xiangshan.frontend.bpu.utage.MicroTage
-import xiangshan.frontend.bpu.utage1.MicroTage1
+import xiangshan.frontend.bpu.utage1.MicroTage2
 
 class Bpu(implicit p: Parameters) extends BpuModule with HalfAlignHelper {
   class DummyBpuIO extends Bundle {
@@ -56,7 +56,7 @@ class Bpu(implicit p: Parameters) extends BpuModule with HalfAlignHelper {
   private val abtb        = Module(new AheadBtb)
   private val utage       = Module(new MicroTage)
   private val mbtb        = Module(new MainBtb)
-  private val tempTage    = Module(new MicroTage1)
+  private val tempTage    = Module(new MicroTage2)
   // private val tage        = Module(new Tage)
   private val ittage      = Module(new Ittage)
   private val sc          = Module(new Sc)
