@@ -132,10 +132,10 @@ class MicroTage3(implicit p: Parameters) extends BasePredictor with HasMicroTage
   private val t1_histTableNeedAlloc  = t1_misPred.reduce(_ || _)
   private val t1_histTableNeedUpdate = t1_trainMeta.histTableHit
   private val t1_histHitMisPred      = t1_misPred.reduce(_ || _) && t1_trainMeta.histTableHit // t1_trainMeta.histTableHit && t1_hasPredBrWrong.reduce(_ || _)
-  private val t1_updateTaken       = t1_updateBranch.taken
-  private val t1_updateCfiPosition = t1_updateBranch.cfiPosition
-  private val t1_allocTaken       = t1_misPredBranch.taken
-  private val t1_allocCfiPosition = t1_misPredBranch.cfiPosition
+  private val t1_updateTaken       = t1_updateBranch.bits.taken
+  private val t1_updateCfiPosition = t1_updateBranch.bits.cfiPosition
+  private val t1_allocTaken       = t1_misPredBranch.bits.taken
+  private val t1_allocCfiPosition = t1_misPredBranch.bits.cfiPosition
 
   private val t1_providerMask = PriorityEncoderOH(t1_trainMeta.histTableHitMap.reverse).reverse
   private val t1_histTableNoUseful = t1_trainMeta.histTableUsefulVec.map(useful => useful === 0.U).asUInt

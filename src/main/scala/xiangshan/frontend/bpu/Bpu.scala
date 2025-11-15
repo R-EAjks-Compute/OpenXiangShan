@@ -38,7 +38,7 @@ import xiangshan.frontend.bpu.sc.Sc
 import xiangshan.frontend.bpu.tage.Tage
 import xiangshan.frontend.bpu.ubtb.MicroBtb
 import xiangshan.frontend.bpu.utage.MicroTage
-import xiangshan.frontend.bpu.utage1.MicroTage2
+import xiangshan.frontend.bpu.utage1.MicroTage3
 
 class Bpu(implicit p: Parameters) extends BpuModule with HalfAlignHelper {
   class DummyBpuIO extends Bundle {
@@ -56,7 +56,7 @@ class Bpu(implicit p: Parameters) extends BpuModule with HalfAlignHelper {
   private val abtb        = Module(new AheadBtb)
   private val utage       = Module(new MicroTage)
   private val mbtb        = Module(new MainBtb)
-  private val tempTage    = Module(new MicroTage2)
+  private val tempTage    = Module(new MicroTage3)
   // private val tage        = Module(new Tage)
   private val ittage      = Module(new Ittage)
   private val sc          = Module(new Sc)
@@ -317,7 +317,7 @@ class Bpu(implicit p: Parameters) extends BpuModule with HalfAlignHelper {
   // private val s2_condTakenMask = tage.io.condTakenMask
   private val s2_tempTageTaken    = RegEnable(tempTage.io.prediction.taken, s1_fire)
   private val s2_tempTagePosition = RegEnable(tempTage.io.prediction.cfiPosition, s1_fire)
-  private val s2_condTakenMask = s2_mbtbResult.map{e => (e.bits.cfiPosition === s2_tempTagePosition) && e.bits.attribute.isConditional && s2_tempTageTaken}
+  private val s2_condTakenMask = s2_mbtbResult.map{e => (e.bits.cfiPosition === s2_tempTagePosition) && e.valid && e.bits.attribute.isConditional && s2_tempTageTaken}
   private val s2_jumpMask = VecInit(s2_mbtbResult.map { e =>
     e.valid && (e.bits.attribute.isDirect || e.bits.attribute.isIndirect)
   })

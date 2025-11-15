@@ -124,8 +124,10 @@ class MicroTage2Table(
   private val (trainIdx, trainTag) =
     computeHash(io.update.bits.startPc.toUInt, io.update.bits.foldedPathHistForTrain, tableId)
 
-  private val oldTakenCtr = io.update.bits.oldTakenCtr
-  private val oldUseful   = io.update.bits.oldUseful
+  // private val oldTakenCtr = io.update.bits.oldTakenCtr
+  // private val oldUseful   = io.update.bits.oldUseful
+  private val oldTakenCtr = entries(trainIdx).takenCtr
+  private val oldUseful   = usefulEntries(trainIdx)
   private val updateEntry = Wire(new MicroTageEntry)
   updateEntry.valid := true.B
   updateEntry.tag   := trainTag
