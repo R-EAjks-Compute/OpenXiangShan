@@ -30,17 +30,18 @@ case class ScParameters(
     ),
     BiasTableSize:       Int = 128,
     BiasUseTageBitWidth: Int = 2, // use tage_taken as index bits
-
-    PathEnable:      Boolean = true,
-    GlobalEnable:    Boolean = false,
-    BiasEnable:      Boolean = true,
-    CtrWidth:        Int = 6,
-    ThresholdWidth:  Int = 12,
-    NumTables:       Int = 2,
-    NumBanks:        Int = 2,
-    WriteBufferSize: Int = 4,
-    TagWidth:        Int = 12,
-    EnableScTrace:   Boolean = false
+    ImliTableSize:       Int = 128,
+    PathEnable:          Boolean = true,
+    GlobalEnable:        Boolean = false,
+    ImliEnable:          Boolean = false,
+    BiasEnable:          Boolean = true,
+    CtrWidth:            Int = 6,
+    ThresholdWidth:      Int = 12,
+    NumTables:           Int = 2,
+    NumBanks:            Int = 2,
+    WriteBufferSize:     Int = 4,
+    TagWidth:            Int = 12,
+    EnableScTrace:       Boolean = false
 ) {}
 
 trait HasScParameters extends HasBpuParameters {
@@ -48,6 +49,7 @@ trait HasScParameters extends HasBpuParameters {
 
   def PathEnable:   Boolean = scParameters.PathEnable
   def GlobalEnable: Boolean = scParameters.GlobalEnable
+  def ImliEnable:   Boolean = scParameters.ImliEnable
   def BiasEnable:   Boolean = scParameters.BiasEnable
 
   def TageTakenCtrWidth: Int = bpuParameters.tageParameters.TakenCtrWidth
@@ -68,6 +70,9 @@ trait HasScParameters extends HasBpuParameters {
   def BiasTableNumWays:    Int = NumWays << BiasUseTageBitWidth // add tage_taken bits as wayIdx
   def NumBiasTable:        Int = 1
 
+  def NumImliTable: Int = 1
+
+  def ImliTableSize:   Int = scParameters.ImliTableSize
   def WriteBufferSize: Int = scParameters.WriteBufferSize
   def TotalSumWidth: Int = CtrWidth + 1 + log2Ceil(NumPathTables + NumGlobalTables + NumBiasTable) // +1 for counter * 2
   def EnableScTrace: Boolean = scParameters.EnableScTrace
