@@ -388,7 +388,7 @@ class Sc(implicit p: Parameters) extends BasePredictor with HasScParameters with
       case (prevThres, (((writeValid, writeWayIdx), taken), branchIdx)) =>
         val scWrong      = taken =/= t1_meta.scPred(branchIdx)
         val shouldUpdate = writeValid && (scWrong || !t1_meta.sumAboveThres(branchIdx)) && false.B
-        prevThres.getUpdate(scWrong, shouldUpdate)
+        prevThres.getUpdate(scWrong, en = shouldUpdate)
     }
 
   // calculate pathTable and globalTable write wayMask
