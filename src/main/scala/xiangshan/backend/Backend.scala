@@ -208,6 +208,7 @@ class BackendInlinedImp(override val wrapper: BackendInlined)(implicit p: Parame
   ctrlBlock.io.fromWB.wbData.zip(wbDataPathToCtrlBlock).map(x => x._1 := x._2)
   ctrlBlock.io.fromMem.stIn <> io.mem.stIn
   ctrlBlock.io.fromMem.violation <> io.mem.memoryViolation
+  ctrlBlock.io.fromMem.mdpTrain <> io.mem.mdpTrain
   ctrlBlock.io.lqCanAccept := io.mem.lqCanAccept
   ctrlBlock.io.sqCanAccept := io.mem.sqCanAccept
 
@@ -618,6 +619,7 @@ class BackendMemIO(implicit p: Parameters, params: BackendParams) extends XSBund
   val stIn = Input(Vec(params.StaExuCnt, ValidIO(new StoreUnitToLFST)))
 
   val memoryViolation = Flipped(ValidIO(new Redirect))
+  val mdpTrain        = Flipped(ValidIO(new Redirect))
   val exceptionAddr = Input(new Bundle {
     val vaddr = UInt(XLEN.W)
     val gpaddr = UInt(XLEN.W)
