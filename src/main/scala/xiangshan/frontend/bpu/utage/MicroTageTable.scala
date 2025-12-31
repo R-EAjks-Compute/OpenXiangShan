@@ -137,7 +137,8 @@ class MicroTageTable(
 
   private val updateUseful = Mux(
     io.update.bits.allocValid,
-    oldUseful.getWeakPositive,
+    if (tableId == 0) { oldUseful.getWeakNegative }
+    else { oldUseful.getWeakPositive },
     oldUseful.getUpdate(io.update.bits.usefulCorrect)
   )
 
@@ -152,7 +153,11 @@ class MicroTageTable(
 
   when(io.usefulReset) {
     usefulEntries.zipWithIndex.foreach { case (entry, i) =>
-      usefulEntries(i).value := entry.value >> 1.U
+      if (tableId == 0) {
+        usefulEntries(i).value := Mux(entry.value === 0.U, 0.U, entry.value - 1.U)
+      } else {
+        usefulEntries(i).value := entry.value >> 1.U
+      }
     }
   }
 
