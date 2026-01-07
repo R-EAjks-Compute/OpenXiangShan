@@ -544,14 +544,14 @@ class Sc(implicit p: Parameters) extends BasePredictor with HasScParameters with
 
   globalTable.zip(t1_globalSetIdx).zip(t1_writeGlobalEntryVec).zip(t1_writeGlobalEntryWayMaskVec).foreach {
     case (((table, idx), writeEntries), writeWayMask) =>
-      table.io.update.valid    := t1_writeValid && GlobalEnable.B
+      table.io.update.valid    := t1_writeValid && t1_meta.scGhr.valid && GlobalEnable.B
       table.io.update.setIdx   := idx
       table.io.update.bankMask := t1_bankMask
       table.io.update.wayMask  := writeWayMask
       table.io.update.entryVec := writeEntries
   }
 
-  imliTable.io.update.valid    := t1_writeValid && ImliEnable.B
+  imliTable.io.update.valid    := t1_writeValid && t1_meta.scGhr.valid && ImliEnable.B
   imliTable.io.update.setIdx   := t1_imliSetIdx
   imliTable.io.update.bankMask := t1_bankMask
   imliTable.io.update.wayMask  := t1_writeImliWayMask
