@@ -162,7 +162,7 @@ class Sc(implicit p: Parameters) extends BasePredictor with HasScParameters with
   private val s0_globalIdx = GlobalTableInfos.map(info =>
     getGlobalTableIdx(
       s0_startPc,
-      s0_ghr.ghr.asUInt(info.HistoryLength - 1, 0),
+      s0_ghr.ghr(info.HistoryLength - 1, 0),
       info.Size,
       info.HistoryLength
     )
@@ -293,6 +293,7 @@ class Sc(implicit p: Parameters) extends BasePredictor with HasScParameters with
 
   private val s2_pathPred   = s2_wayIdx.map(wayIdx => s2_pathPercsum(wayIdx) >= 0.S)       // for performance counter
   private val s2_globalPred = s2_wayIdx.map(wayIdx => s2_globalPercsum(wayIdx) >= 0.S)     // for performance counter
+  private val s2_imliPred   = s2_wayIdx.map(wayIdx => s2_imliPercsum(wayIdx) >= 0.S)       // for performance counter
   private val s2_biasPred   = s2_biasWayIdx.map(biasIdx => s2_biasPercsum(biasIdx) >= 0.S) // for performance counter
 
   private val s2_totalPercsum = VecInit(s2_wayIdx.zip(s2_biasWayIdx).map {
@@ -358,10 +359,12 @@ class Sc(implicit p: Parameters) extends BasePredictor with HasScParameters with
 
   io.meta.debug_scPathTakenVec.get   := VecInit(s2_pathPred.map(RegEnable(_, s2_fire))) // for performance counter
   io.meta.debug_scGlobalTakenVec.get := VecInit(s2_globalPred.map(RegEnable(_, s2_fire)))
+  io.meta.debug_scImliTakenVec.get   := VecInit(s2_imliPred.map(RegEnable(_, s2_fire)))
   io.meta.debug_scBiasTakenVec.get   := VecInit(s2_biasPred.map(RegEnable(_, s2_fire)))
 
   io.meta.debug_predPathIdx.get   := RegEnable(VecInit(s2_pathIdx), s2_fire) // for debug
   io.meta.debug_predGlobalIdx.get := RegEnable(VecInit(s2_globalIdx), s2_fire)
+  io.meta.debug_predImliIdx.get   := RegEnable(s2_imliIdx, s2_fire)
   io.meta.debug_predBiasIdx.get   := RegEnable(s2_biasIdx, s2_fire)
 
   /*
@@ -577,6 +580,8 @@ class Sc(implicit p: Parameters) extends BasePredictor with HasScParameters with
   private val scPathWrongVec     = WireInit(VecInit.fill(NumWays)(false.B))
   private val scGlobalCorrectVec = WireInit(VecInit.fill(NumWays)(false.B))
   private val scGlobalWrongVec   = WireInit(VecInit.fill(NumWays)(false.B))
+  private val scImliCorrectVec   = WireInit(VecInit.fill(NumWays)(false.B))
+  private val scImliWrongVec     = WireInit(VecInit.fill(NumWays)(false.B))
   private val scBiasCorrectVec   = WireInit(VecInit.fill(NumWays)(false.B))
   private val scBiasWrongVec     = WireInit(VecInit.fill(NumWays)(false.B))
 
@@ -598,6 +603,8 @@ class Sc(implicit p: Parameters) extends BasePredictor with HasScParameters with
       scPathWrongVec(branchWayIdx)     := t1_writeTakenVec(i) =/= t1_meta.debug_scPathTakenVec.get(branchWayIdx)
       scGlobalCorrectVec(branchWayIdx) := t1_writeTakenVec(i) === t1_meta.debug_scGlobalTakenVec.get(branchWayIdx)
       scGlobalWrongVec(branchWayIdx)   := t1_writeTakenVec(i) =/= t1_meta.debug_scGlobalTakenVec.get(branchWayIdx)
+      scImliCorrectVec(branchWayIdx)   := t1_writeTakenVec(i) === t1_meta.debug_scImliTakenVec.get(branchWayIdx)
+      scImliWrongVec(branchWayIdx)     := t1_writeTakenVec(i) =/= t1_meta.debug_scImliTakenVec.get(branchWayIdx)
       scBiasCorrectVec(branchWayIdx)   := t1_writeTakenVec(i) === t1_meta.debug_scBiasTakenVec.get(branchWayIdx)
       scBiasWrongVec(branchWayIdx)     := t1_writeTakenVec(i) =/= t1_meta.debug_scBiasTakenVec.get(branchWayIdx)
 
@@ -632,6 +639,8 @@ class Sc(implicit p: Parameters) extends BasePredictor with HasScParameters with
     XSPerfAccumulate(s"sc_path_wrong${i}", scPathWrongVec(i))
     XSPerfAccumulate(s"sc_global_correct${i}", scGlobalCorrectVec(i))
     XSPerfAccumulate(s"sc_global_wrong${i}", scGlobalWrongVec(i))
+    XSPerfAccumulate(s"sc_imli_correct${i}", scImliCorrectVec(i))
+    XSPerfAccumulate(s"sc_imli_wrong${i}", scImliWrongVec(i))
     XSPerfAccumulate(s"sc_bias_correct${i}", scBiasCorrectVec(i))
     XSPerfAccumulate(s"sc_bias_wrong${i}", scBiasWrongVec(i))
 
@@ -673,6 +682,8 @@ class Sc(implicit p: Parameters) extends BasePredictor with HasScParameters with
   XSPerfAccumulate(s"total_sc_path_wrong", scPathWrongVec.reduce(_ || _))
   XSPerfAccumulate(s"total_sc_global_correct", scGlobalCorrectVec.reduce(_ || _))
   XSPerfAccumulate(s"total_sc_global_wrong", scGlobalWrongVec.reduce(_ || _))
+  XSPerfAccumulate(s"total_sc_imli_correct", scImliCorrectVec.reduce(_ || _))
+  XSPerfAccumulate(s"total_sc_imli_wrong", scImliWrongVec.reduce(_ || _))
   XSPerfAccumulate(s"total_sc_bias_correct", scBiasCorrectVec.reduce(_ || _))
   XSPerfAccumulate(s"total_sc_bias_wrong", scBiasWrongVec.reduce(_ || _))
 

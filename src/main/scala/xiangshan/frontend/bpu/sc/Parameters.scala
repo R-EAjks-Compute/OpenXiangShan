@@ -33,7 +33,7 @@ case class ScParameters(
     ImliTableSize:       Int = 128,
     PathEnable:          Boolean = true,
     GlobalEnable:        Boolean = false,
-    ImliEnable:          Boolean = false,
+    ImliEnable:          Boolean = true,
     BiasEnable:          Boolean = true,
     CtrWidth:            Int = 6,
     ThresholdWidth:      Int = 12,
@@ -70,7 +70,8 @@ trait HasScParameters extends HasBpuParameters {
   def BiasTableNumWays:    Int = NumWays << BiasUseTageBitWidth // add tage_taken bits as wayIdx
   def NumBiasTable:        Int = 1
 
-  def NumImliTable: Int = 1
+  def ImliHistoryLength: Int = bpuParameters.ghrParameters.ImliHistoryLength
+  def NumImliTable:      Int = 1
 
   def ImliTableSize:   Int = scParameters.ImliTableSize
   def WriteBufferSize: Int = scParameters.WriteBufferSize

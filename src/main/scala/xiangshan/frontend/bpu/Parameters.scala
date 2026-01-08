@@ -18,6 +18,7 @@ package xiangshan.frontend.bpu
 import chisel3.util._
 import xiangshan.frontend.HasFrontendParameters
 import xiangshan.frontend.bpu.abtb.AheadBtbParameters
+import xiangshan.frontend.bpu.history.ghr.GhrParameters
 import xiangshan.frontend.bpu.history.phr.PhrParameters
 import xiangshan.frontend.bpu.ittage.IttageParameters
 import xiangshan.frontend.bpu.mbtb.MainBtbParameters
@@ -36,6 +37,7 @@ case class BpuParameters(
     EnableBpTrace: Boolean = false,
     // history
     phrParameters: PhrParameters = PhrParameters(),
+    ghrParameters: GhrParameters = GhrParameters(),
     // sub predictors
     ubtbParameters:   MicroBtbParameters = MicroBtbParameters(),
     abtbParameters:   AheadBtbParameters = AheadBtbParameters(),
