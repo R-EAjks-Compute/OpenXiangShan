@@ -599,14 +599,18 @@ class Sc(implicit p: Parameters) extends BasePredictor with HasScParameters with
       scWrongVec(branchWayIdx)     := t1_writeTakenVec(i) =/= t1_meta.scPred(branchWayIdx)
       trainUseScVec(branchWayIdx)  := true.B
 
-      scPathCorrectVec(branchWayIdx)   := t1_writeTakenVec(i) === t1_meta.debug_scPathTakenVec.get(branchWayIdx)
-      scPathWrongVec(branchWayIdx)     := t1_writeTakenVec(i) =/= t1_meta.debug_scPathTakenVec.get(branchWayIdx)
-      scGlobalCorrectVec(branchWayIdx) := t1_writeTakenVec(i) === t1_meta.debug_scGlobalTakenVec.get(branchWayIdx)
-      scGlobalWrongVec(branchWayIdx)   := t1_writeTakenVec(i) =/= t1_meta.debug_scGlobalTakenVec.get(branchWayIdx)
-      scImliCorrectVec(branchWayIdx)   := t1_writeTakenVec(i) === t1_meta.debug_scImliTakenVec.get(branchWayIdx)
-      scImliWrongVec(branchWayIdx)     := t1_writeTakenVec(i) =/= t1_meta.debug_scImliTakenVec.get(branchWayIdx)
-      scBiasCorrectVec(branchWayIdx)   := t1_writeTakenVec(i) === t1_meta.debug_scBiasTakenVec.get(branchWayIdx)
-      scBiasWrongVec(branchWayIdx)     := t1_writeTakenVec(i) =/= t1_meta.debug_scBiasTakenVec.get(branchWayIdx)
+      scPathCorrectVec(branchWayIdx) := t1_writeTakenVec(i) === t1_meta.debug_scPathTakenVec.get(branchWayIdx)
+      scPathWrongVec(branchWayIdx)   := t1_writeTakenVec(i) =/= t1_meta.debug_scPathTakenVec.get(branchWayIdx)
+      scGlobalCorrectVec(branchWayIdx) := t1_writeTakenVec(i) ===
+        t1_meta.debug_scGlobalTakenVec.get(branchWayIdx) && t1_meta.scGhr.valid
+      scGlobalWrongVec(branchWayIdx) := t1_writeTakenVec(i) =/=
+        t1_meta.debug_scGlobalTakenVec.get(branchWayIdx) && t1_meta.scGhr.valid
+      scImliCorrectVec(branchWayIdx) := t1_writeTakenVec(i) ===
+        t1_meta.debug_scImliTakenVec.get(branchWayIdx) && t1_meta.scGhr.valid
+      scImliWrongVec(branchWayIdx) := t1_writeTakenVec(i) =/=
+        t1_meta.debug_scImliTakenVec.get(branchWayIdx) && t1_meta.scGhr.valid
+      scBiasCorrectVec(branchWayIdx) := t1_writeTakenVec(i) === t1_meta.debug_scBiasTakenVec.get(branchWayIdx)
+      scBiasWrongVec(branchWayIdx)   := t1_writeTakenVec(i) =/= t1_meta.debug_scBiasTakenVec.get(branchWayIdx)
 
       scUsedVec(branchWayIdx) := true.B
     }.otherwise {
