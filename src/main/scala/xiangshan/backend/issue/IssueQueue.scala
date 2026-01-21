@@ -914,8 +914,6 @@ class IssueQueueImp(implicit p: Parameters, params: IssueBlockParams) extends XS
     deq.bits.common.pc.foreach(_ := 0.U)
     deq.bits.common.fpu.foreach(_ := deqEntryVec(i).bits.payload.fpu.get)
     deq.bits.common.vpu.foreach(_ := deqEntryVec(i).bits.payload.vpu.get)
-    // TODO delate payload.uopIdx
-    deq.bits.common.vpu.foreach(_.vuopIdx := deqEntryVec(i).bits.payload.uopIdx.get)
     deq.bits.common.vpu.foreach(_.lastUop := deqEntryVec(i).bits.payload.lastUop.get)
     deq.bits.common.ftqIdx.foreach(_ := deqEntryVec(i).bits.payload.ftqPtr.get)
     deq.bits.common.ftqOffset.foreach(_ := deqEntryVec(i).bits.payload.ftqOffset.get)

@@ -121,7 +121,6 @@ object Bundles {
     val vlsInstr = Bool()
     val wfflags = Bool()
     val isMove = Bool()
-    val uopIdx = UopIdx()
     val uopSplitType = UopSplitType()
     val isVset = Bool()
     val firstUop = Bool()
@@ -209,7 +208,6 @@ object Bundles {
     val vlsInstr = Bool()
     val wfflags = Bool()
     val isMove = Bool()
-    val uopIdx = UopIdx()
     val isVset = Bool()
     val firstUop = Bool()
     val lastUop = Bool()
@@ -277,7 +275,6 @@ object Bundles {
     val fpu = new FPUCtrlSignals
     val vpu = new VPUCtrlSignals
     val wfflags = Bool()
-    val uopIdx = UopIdx()
     val lastUop = Bool()
     // from rename
     val psrc = Vec(numSrc, UInt(PhyRegIdxWidth.W))
@@ -337,7 +334,6 @@ object Bundles {
     val fpu      = Option.when(params.writeFflags)(new FPUCtrlSignals)
     val vpu      = Option.when(params.inVfSchd)(new VPUCtrlSignals)
     val wfflags  = Option.when(params.writeFflags)(Bool())
-    val uopIdx   = Option.when(params.inVfSchd)(UopIdx())
     val lastUop  = Option.when(params.inVfSchd)(Bool())
     // from rename
     val robIdx    = new RobPtr
@@ -388,7 +384,6 @@ object Bundles {
     val fpu      = Option.when(params.writeFflags)(new FPUCtrlSignals)
     val vpu      = Option.when(params.inVfSchd)(new VPUCtrlSignals)
     val wfflags  = Option.when(params.writeFflags)(Bool())
-    val uopIdx   = Option.when(params.inVfSchd)(UopIdx())
     val lastUop  = Option.when(params.inVfSchd)(Bool())
     // from rename
     val psrc      = Vec(numSrc, UInt(PhyRegIdxWidth.W))
@@ -470,7 +465,6 @@ object Bundles {
     val wfflags         = Bool()
     val isMove          = Bool()
     val isDropAmocasSta = Bool()
-    val uopIdx          = UopIdx()
     val isVset          = Bool()
     val firstUop        = Bool()
     val lastUop         = Bool()

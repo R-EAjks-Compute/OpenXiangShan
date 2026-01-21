@@ -242,7 +242,7 @@ class StoreQueue(implicit p: Parameters) extends XSModule
     exceptionBuffer.io.storeAddrIn(StorePipelineWidth * 2 + i).bits.fullva         := io.vecFeedback(i).bits.vaddr
     exceptionBuffer.io.storeAddrIn(StorePipelineWidth * 2 + i).bits.vaNeedExt      := io.vecFeedback(i).bits.vaNeedExt
     exceptionBuffer.io.storeAddrIn(StorePipelineWidth * 2 + i).bits.gpaddr         := io.vecFeedback(i).bits.gpaddr
-    exceptionBuffer.io.storeAddrIn(StorePipelineWidth * 2 + i).bits.uop.uopIdx     := io.vecFeedback(i).bits.uopidx
+    exceptionBuffer.io.storeAddrIn(StorePipelineWidth * 2 + i).bits.uop.vpu.vuopIdx:= io.vecFeedback(i).bits.uopidx
     exceptionBuffer.io.storeAddrIn(StorePipelineWidth * 2 + i).bits.uop.robIdx     := io.vecFeedback(i).bits.robidx
     exceptionBuffer.io.storeAddrIn(StorePipelineWidth * 2 + i).bits.uop.vpu.vstart := io.vecFeedback(i).bits.vstart
     exceptionBuffer.io.storeAddrIn(StorePipelineWidth * 2 + i).bits.uop.vpu.vl     := io.vecFeedback(i).bits.vl
@@ -1153,7 +1153,7 @@ class StoreQueue(implicit p: Parameters) extends XSModule
   commitCount := PopCount(commitVec)
   cmtPtrExt := cmtPtrExt.map(_ + commitCount)
   io.sqCommitPtr := cmtPtrExt(0)
-  io.sqCommitUopIdx := uop(cmtPtrExt(0).value).uopIdx
+  io.sqCommitUopIdx := uop(cmtPtrExt(0).value).vpu.vuopIdx
   io.sqCommitRobIdx := uop(cmtPtrExt(0).value).robIdx
 
   /**
@@ -1448,7 +1448,7 @@ class StoreQueue(implicit p: Parameters) extends XSModule
     val fbk = io.vecFeedback
     for (j <- 0 until VecStorePipelineWidth) {
       vecCommittmp(i)(j) := fbk(j).valid && (fbk(j).bits.isCommit || fbk(j).bits.isFlush) &&
-        uop(i).robIdx === fbk(j).bits.robidx && uop(i).uopIdx === fbk(j).bits.uopidx && allocated(i)
+        uop(i).robIdx === fbk(j).bits.robidx && uop(i).vpu.vuopIdx === fbk(j).bits.uopidx && allocated(i)
     }
     vecCommit(i) := vecCommittmp(i).reduce(_ || _)
 

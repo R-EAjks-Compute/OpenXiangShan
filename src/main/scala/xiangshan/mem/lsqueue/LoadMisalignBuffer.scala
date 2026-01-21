@@ -105,7 +105,7 @@ class LoadMisalignBuffer(val param: ExeUnitParams)(implicit p: Parameters) exten
       }
       val oldest = Mux(valid(0) && valid(1),
         Mux(isAfter(bits(0).uop.robIdx, bits(1).uop.robIdx) ||
-          (bits(0).uop.robIdx === bits(1).uop.robIdx && bits(0).uop.uopIdx > bits(1).uop.uopIdx), res(1), res(0)),
+          (bits(0).uop.robIdx === bits(1).uop.robIdx && bits(0).uop.vpu.vuopIdx > bits(1).uop.vpu.vuopIdx), res(1), res(0)),
         Mux(valid(0) && !valid(1), res(0), res(1)))
       (Seq(oldest.valid), Seq(oldest.bits))
     } else {

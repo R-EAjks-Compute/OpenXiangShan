@@ -148,7 +148,7 @@ class VSplitPipeline(param: ExeUnitParams, isVStore: Boolean = false)(implicit p
     x.uop := io.in.bits.toDynInst()
     x.uop.imm := 0.U
     x.uop.vpu.vl := evl
-    x.uop.uopIdx := uopIdx
+    x.uop.vpu.vuopIdx := uopIdx
     x.uop.numUops := numUops
     x.uop.lastUop := (uopIdx +& 1.U) === numUops
     x.uop.vpu.nf  := s0_nf
@@ -467,7 +467,7 @@ class VSSplitBufferImp(implicit p: Parameters) extends VSplitBuffer(isVStore = t
     (io.vstdMisalign.get.storeMisalignBufferEmpty ||
       io.vstdMisalign.get.storeMisalignBufferRobIdx > io.out.bits.uop.robIdx ||
       io.vstdMisalign.get.storeMisalignBufferRobIdx === io.out.bits.uop.robIdx &&
-        io.vstdMisalign.get.storeMisalignBufferUopIdx > io.out.bits.uop.uopIdx)
+        io.vstdMisalign.get.storeMisalignBufferUopIdx > io.out.bits.uop.vpu.vuopIdx)
 
   // split data
   val splitData = genVSData(

@@ -508,7 +508,7 @@ class NewDispatch(implicit p: Parameters) extends XSModule with HasPerfEvents wi
   val dispatchBlock = fromRename.map(_.valid).reduce(_ || _) && !io.toRenameAllFire
   for (i <- 0 until RenameWidth){
     // check is drop amocas sta
-    fromRenameUpdate(i).bits.isDropAmocasSta := fromRename(i).bits.isAMOCAS && fromRename(i).bits.uopIdx(0) === 0.U
+    fromRenameUpdate(i).bits.isDropAmocasSta := fromRename(i).bits.isAMOCAS && fromRename(i).bits.vpu.vuopIdx(0) === 0.U
     // update singleStep
     fromRenameUpdate(i).bits.singleStep := io.singleStep && (fromRename(i).bits.robIdx =/= robidxCanCommitStepping)
   }

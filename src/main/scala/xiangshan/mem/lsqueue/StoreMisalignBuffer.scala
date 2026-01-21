@@ -85,12 +85,12 @@ class StoreMisalignBuffer(implicit p: Parameters) extends XSModule
       }
       val oldest = Mux(valid(0) && valid(1),
         Mux(isAfter(bits(0).uop.robIdx, bits(1).uop.robIdx) ||
-          (isNotBefore(bits(0).uop.robIdx, bits(1).uop.robIdx) && bits(0).uop.uopIdx > bits(1).uop.uopIdx), res(1), res(0)),
+          (isNotBefore(bits(0).uop.robIdx, bits(1).uop.robIdx) && bits(0).uop.vpu.vuopIdx > bits(1).uop.vpu.vuopIdx), res(1), res(0)),
         Mux(valid(0) && !valid(1), res(0), res(1)))
 
       val oldestIndex = Mux(valid(0) && valid(1),
         Mux(isAfter(bits(0).uop.robIdx, bits(1).uop.robIdx) ||
-          (bits(0).uop.robIdx === bits(1).uop.robIdx && bits(0).uop.uopIdx > bits(1).uop.uopIdx), resIndex(1), resIndex(0)),
+          (bits(0).uop.robIdx === bits(1).uop.robIdx && bits(0).uop.vpu.vuopIdx > bits(1).uop.vpu.vuopIdx), resIndex(1), resIndex(0)),
         Mux(valid(0) && !valid(1), resIndex(0), resIndex(1)))
       (Seq(oldest.valid), Seq(oldest.bits), Seq(oldestIndex))
     } else {
@@ -175,7 +175,7 @@ class StoreMisalignBuffer(implicit p: Parameters) extends XSModule
   when (cross4KBPageBoundary && !reqRedirect) {
     when(
       reqSelValid &&
-      (isAfter(req.uop.robIdx, reqSelBits.uop.robIdx) || (isNotBefore(req.uop.robIdx, reqSelBits.uop.robIdx) && req.uop.uopIdx > reqSelBits.uop.uopIdx)) &&
+      (isAfter(req.uop.robIdx, reqSelBits.uop.robIdx) || (isNotBefore(req.uop.robIdx, reqSelBits.uop.robIdx) && req.uop.vpu.vuopIdx > reqSelBits.uop.vpu.vuopIdx)) &&
       bufferState === s_idle
     ) {
       connectSamePort(req, reqSelBits)
@@ -197,7 +197,7 @@ class StoreMisalignBuffer(implicit p: Parameters) extends XSModule
 
   io.toVecSplit.empty  := !req_valid
   io.toVecSplit.robIdx := req.uop.robIdx
-  io.toVecSplit.uopIdx := req.uop.uopIdx
+  io.toVecSplit.uopIdx := req.uop.vpu.vuopIdx
 
   //logic
   val splitStoreReqs = RegInit(VecInit(List.fill(maxSplitNum)(0.U.asTypeOf(new LsPipelineBundle))))
@@ -225,7 +225,7 @@ class StoreMisalignBuffer(implicit p: Parameters) extends XSModule
   io.sqControl.toStoreQueue.crossPageCanDeq := !isCrossPage || bufferState === s_block
   io.sqControl.toStoreQueue.paddr := Cat(splitStoreResp(1).paddr(splitStoreResp(1).paddr.getWidth - 1, 3), 0.U(3.W))
 
-  io.sqControl.toStoreQueue.withSameUop := io.sqControl.toStoreMisalignBuffer.uop.robIdx === req.uop.robIdx && io.sqControl.toStoreMisalignBuffer.uop.uopIdx === req.uop.uopIdx && req.isvec && robMatch && isCrossPage
+  io.sqControl.toStoreQueue.withSameUop := io.sqControl.toStoreMisalignBuffer.uop.robIdx === req.uop.robIdx && io.sqControl.toStoreMisalignBuffer.uop.vpu.vuopIdx === req.uop.vpu.vuopIdx && req.isvec && robMatch && isCrossPage
 
   //state transition
   switch(bufferState) {

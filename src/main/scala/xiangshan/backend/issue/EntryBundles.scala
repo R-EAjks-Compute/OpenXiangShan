@@ -139,7 +139,6 @@ object EntryBundles extends HasCircularQueuePtrHelper {
     val srcReady              = Output(Bool())
     val fuType                = Output(FuType())
     val robIdx                = Output(new RobPtr)
-    val uopIdx                = Option.when(params.isVecMemIQ)(Output(UopIdx()))
     //src
     val dataSources           = Vec(params.numRegSrc, Output(DataSource()))
     val exuSources            = Option.when(params.hasIQWakeUp)(Vec(params.numRegSrc, Output(ExuSource())))
@@ -506,10 +505,6 @@ object EntryBundles extends HasCircularQueuePtrHelper {
       commonOut.perfLdCancel.get                      := common.srcCancelVec.map(_ && validReg)
       commonOut.perfOg0Cancel.get                     := hasIQWakeupGet.srcWakeupByIQButCancel.map(_.asUInt.orR && validReg)
       commonOut.perfWakeupByIQ.get                    := hasIQWakeupGet.srcWakeupByIQ.map(x => VecInit(x.map(_ && validReg)))
-    }
-    // vecMem
-    if (params.isVecMemIQ) {
-      commonOut.uopIdx.get                            := entryReg.payload.uopIdx.get
     }
   }
 

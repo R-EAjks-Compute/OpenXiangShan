@@ -844,7 +844,7 @@ class DecodeUnit(implicit p: Parameters) extends XSModule with DecodeUnitConstan
 
   decodedInst.connectDecodeInUop(io.enq.decodeInUop)
 
-  decodedInst.uopIdx := 0.U
+  decodedInst.vpu.vuopIdx := 0.U
   decodedInst.firstUop := true.B
   decodedInst.lastUop := true.B
   val numWBIs2 = FuType.isStore(decodedInst.fuType) || FuType.isJump(decodedInst.fuType) && (decodedInst.ldest =/= 0.U)

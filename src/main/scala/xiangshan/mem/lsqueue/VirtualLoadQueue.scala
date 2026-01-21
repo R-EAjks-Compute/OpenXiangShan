@@ -179,7 +179,7 @@ class VirtualLoadQueue(implicit p: Parameters) extends XSModule
     when (entryCanEnq) {
       allocated(i) := true.B
       robIdx(i) := selectBits.robIdx
-      uopIdx(i) := selectBits.uopIdx
+      uopIdx(i) := selectBits.vpu.vuopIdx
       isvec(i) :=  FuType.isVLoad(selectBits.fuType)
       committed(i) := false.B
 
