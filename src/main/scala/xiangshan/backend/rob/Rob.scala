@@ -1355,7 +1355,6 @@ class RobImp(override val wrapper: Rob)(implicit p: Parameters, params: BackendP
   private val deqHeadInfoFuType = robEntries(deqPtr.value).debug_fuType.getOrElse(0.U.asTypeOf(FuType()))
   val deqUopCommitType = robEntries(deqPtr.value).debug_commitType.getOrElse(0.U)
 
-  // val deqHeadInfoGetdebug_fuType = deqHeadInfo.debug_fuType.getOrElse(0.U.asTypeOf(FuType()))
   XSPerfAccumulate("waitAluCycle", deqNotWritebacked && deqHeadInfoFuType === FuType.alu.U)
   XSPerfAccumulate("waitMulCycle", deqNotWritebacked && deqHeadInfoFuType === FuType.mul.U)
   XSPerfAccumulate("waitDivCycle", deqNotWritebacked && deqHeadInfoFuType === FuType.div.U)
