@@ -458,7 +458,11 @@ class Sc(implicit p: Parameters) extends BasePredictor with HasScParameters with
             (scWrong || !t1_meta.sumAboveThres(branchIdx))
           prevThres.getUpdate(scWrong, en = shouldUpdate)
       }
-    WireInit(updated)
+    WireInit(Mux(
+      scThreshold(wayIdx).value >= MiniThreshold.U && scThreshold(wayIdx).value <= MaxThreshold.U,
+      updated,
+      scThreshold(wayIdx)
+    ))
   })
   dontTouch(t1_writeThresVec)
 
